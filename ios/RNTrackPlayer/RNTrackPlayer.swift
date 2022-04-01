@@ -286,6 +286,12 @@ public class RNTrackPlayer: RCTEventEmitter {
         resolve(NSNull())
     }
 
+    @objc(isServiceRunning:rejecter:)
+    public func isServiceRunning(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        // TODO That is probably always true
+        resolve(player != nil)
+    }
+
     @objc(destroy)
     public func destroy() {
         print("Destroying player")
@@ -331,15 +337,17 @@ public class RNTrackPlayer: RCTEventEmitter {
             tracks.append(track)
         }
 
+        var index: Int = 0
         if (trackIndex.intValue > player.items.count) {
             reject("index_out_of_bounds", "The track index is out of bounds", nil)
         } else if trackIndex.intValue == -1 { // -1 means no index was passed and therefore should be inserted at the end.
+            index = player.items.count
             try? player.add(items: tracks, playWhenReady: false)
         } else {
+            index = trackIndex.intValue
             try? player.add(items: tracks, at: trackIndex.intValue)
         }
-
-        resolve(NSNull())
+        resolve(index)
     }
 
     @objc(remove:resolver:rejecter:)
@@ -633,10 +641,8 @@ public class RNTrackPlayer: RCTEventEmitter {
         }
 
         // fire an event for the same track starting again
-        switch player.repeatMode {
-        case .track:
+        if player.items.count != 0 && player.repeatMode == .track {
             handleAudioPlayerQueueIndexChange(previousIndex: player.currentIndex, nextIndex: player.currentIndex)
-        default: break
         }
     }
 
