@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
 
 import TrackPlayer from './trackPlayer'
-import { State, Event } from './interfaces'
+import { State, Event, ProgressState } from './interfaces'
 
-/** Get current playback state and subsequent updatates  */
+/** Get current playback state and subsequent updates  */
 export const usePlaybackState = () => {
   const [state, setState] = useState(State.None)
   const isUnmountedRef = useRef(true)
@@ -17,12 +17,14 @@ export const usePlaybackState = () => {
 
   useEffect(() => {
     async function setPlayerState() {
-      const playerState = await TrackPlayer.getState()
+      try {
+        const playerState = await TrackPlayer.getState()
 
-      // If the component has been unmounted, exit
-      if (isUnmountedRef.current) return
+        // If the component has been unmounted, exit
+        if (isUnmountedRef.current) return
 
-      setState(playerState)
+        setState(playerState)
+      } catch {} // getState only throw while you haven't yet setup, ignore failure.
     }
 
     // Set initial state
@@ -62,7 +64,7 @@ export const useTrackPlayerEvents = (events: Event[], handler: Handler) => {
           'One or more of the events provided to useTrackPlayerEvents is ' +
             `not a valid TrackPlayer event: ${invalidTypes.join("', '")}. ` +
             'A list of available events can be found at ' +
-            'https://react-native-kit.github.io/react-native-track-player/documentation/#events',
+            'https://react-native-track-player.js.org/docs/api/events',
         )
       }
     }
@@ -74,12 +76,6 @@ export const useTrackPlayerEvents = (events: Event[], handler: Handler) => {
 
     return () => subs.forEach(sub => sub.remove())
   }, [events])
-}
-
-export interface ProgressState {
-  position: number
-  duration: number
-  buffered: number
 }
 
 /**
@@ -100,26 +96,28 @@ export function useProgress(updateInterval?: number) {
   }, [])
 
   const getProgress = async () => {
-    const [position, duration, buffered] = await Promise.all([
-      TrackPlayer.getPosition(),
-      TrackPlayer.getDuration(),
-      TrackPlayer.getBufferedPosition(),
-    ])
+    try {
+      const [position, duration, buffered] = await Promise.all([
+        TrackPlayer.getPosition(),
+        TrackPlayer.getDuration(),
+        TrackPlayer.getBufferedPosition(),
+      ])
 
-    // If the component has been unmounted, exit
-    if (isUnmountedRef.current) return
+      // If the component has been unmounted, exit
+      if (isUnmountedRef.current) return
 
-    // If there is no change in properties, exit
-    if (
-      position === stateRef.current.position &&
-      duration === stateRef.current.duration &&
-      buffered === stateRef.current.buffered
-    )
-      return
+      // If there is no change in properties, exit
+      if (
+        position === stateRef.current.position &&
+        duration === stateRef.current.duration &&
+        buffered === stateRef.current.buffered
+      )
+        return
 
-    const state = { position, duration, buffered }
-    stateRef.current = state
-    setState(state)
+      const state = { position, duration, buffered }
+      stateRef.current = state
+      setState(state)
+    } catch {} // these method only throw while you haven't yet setup, ignore failure.
   }
 
   useEffect(() => {
