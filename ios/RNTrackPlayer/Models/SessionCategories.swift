@@ -10,7 +10,8 @@ import Foundation
 import MediaPlayer
 import AVFoundation
 
-enum SessionCategory: String {
+enum SessionCategory : String {
+    
     case playAndRecord, multiRoute, playback, ambient, soloAmbient
     
     func mapConfigToAVAudioSessionCategory() -> AVAudioSession.Category {
@@ -29,28 +30,32 @@ enum SessionCategory: String {
     }
 }
 
-enum SessionCategoryPolicy: String {
-    case `default`, longFormAudio, independent, longFormVideo
+enum SessionCategoryOptions : String {
     
-    func mapConfigToAVAudioSessionCategoryPolicy() -> AVAudioSession.RouteSharingPolicy {
+    case mixWithOthers, duckOthers, interruptSpokenAudioAndMixWithOthers, allowBluetooth, allowBluetoothA2DP, allowAirPlay, defaultToSpeaker
+
+    func mapConfigToAVAudioSessionCategoryOptions() -> AVAudioSession.CategoryOptions? {
         switch self {
-        case .default:
-            return .default
-        case .longFormAudio:
-            return .longFormAudio
-        case .independent:
-            return .independent
-        case .longFormVideo:
-            if #available(iOS 13.0, *) {
-                return .longFormVideo
-            } else {
-                return .longFormAudio
-            }
+        case .mixWithOthers:
+            return .mixWithOthers
+        case .duckOthers:
+            return .duckOthers
+        case .interruptSpokenAudioAndMixWithOthers:
+            return .interruptSpokenAudioAndMixWithOthers
+        case .allowBluetooth:
+            return .allowBluetooth
+        case .allowBluetoothA2DP:
+            return .allowBluetoothA2DP
+        case .allowAirPlay:
+            return .allowAirPlay
+        case .defaultToSpeaker:
+            return .defaultToSpeaker
         }
     }
 }
 
-enum SessionCategoryMode: String {
+enum SessionCategoryMode : String {
+    
     case `default`, gameChat, measurement, moviePlayback, spokenAudio, videoChat, videoRecording, voiceChat, voicePrompt
     
     func mapConfigToAVAudioSessionCategoryMode() -> AVAudioSession.Mode {
@@ -82,25 +87,3 @@ enum SessionCategoryMode: String {
     }
 }
 
-enum SessionCategoryOptions : String {
-    case mixWithOthers, duckOthers, interruptSpokenAudioAndMixWithOthers, allowBluetooth, allowBluetoothA2DP, allowAirPlay, defaultToSpeaker
-    
-    func mapConfigToAVAudioSessionCategoryOptions() -> AVAudioSession.CategoryOptions? {
-        switch self {
-        case .mixWithOthers:
-            return .mixWithOthers
-        case .duckOthers:
-            return .duckOthers
-        case .interruptSpokenAudioAndMixWithOthers:
-            return .interruptSpokenAudioAndMixWithOthers
-        case .allowBluetooth:
-            return .allowBluetooth
-        case .allowBluetoothA2DP:
-            return .allowBluetoothA2DP
-        case .allowAirPlay:
-            return .allowAirPlay
-        case .defaultToSpeaker:
-            return .defaultToSpeaker
-        }
-    }
-}
